@@ -6,7 +6,7 @@ gam="$HOME/bin/gam/gam"
 # Enter user to deprovision
 echo "Enter username you wish to deprovision:"
 read username
-email=$username@coreos.com
+email=$username@domain.com
 
 #Confirm user name before deprovisioning
 read -r -p "Do you want to deprovision $username ? [y/n] " response
@@ -86,21 +86,10 @@ $gam update user $username suspended on | tee -a /tmp/$username.log
 #		echo "Not transferring GDrive" | tee -a /tmp/$username.log
 # fi
 
-#Transfer docs to data.archive@coreos.company
-echo "Transfering Drive data to data.archive@coreos.com"
-$gam user $username transfer drive data.archive@coreos.com
+#Transfer docs to data.archive@domain.company
+echo "Transfering Drive data to data.archive@domain.com"
+$gam user $username transfer drive data.archive@domain.com
 echo "Drive transfer complete" | tee -a /tmp/$username.log
-
-#Deleting Quay account
-#authtoken=`cat ~/.quay`
-
-#coreos_r=`curl -s -X DELETE -H "${authtoken}" https://quay.io/api/v1/organization/coreos/team/owners/members/${username}`
-#coreosinc_r=`curl -s -X DELETE -H "${authtoken}" https://quay.io/api/v1/organization/coreosinc/team/owners/members/${username}`
-
-#echo $coreos_r  | jq "."
-#echo $coreosinc_r  | jq "."
-
-#echo "Quay account deleted" | tee -a /tmp/$username.log
 
 
 ## Printing Log location
