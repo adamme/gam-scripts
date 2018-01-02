@@ -9,13 +9,13 @@ read firstname
 echo "User's Lastname:"
 read lastname
 username=$firstname.$lastname
-email=$username@coreos.com
+email=$username@domain.com
 
 #Confirm user name before creating
 read -r -p "Do you want to create $username ? [y/n] " response
 if [[ $response =~ [yY] ]]
   then
-      $gam create user $email firstname $firstname lastname $lastname password "coreos" changepassword on
+      $gam create user $email firstname $firstname lastname $lastname password "temppassword" changepassword on
       $gam user $username update backupcodes
   else
   		echo "Exiting"
