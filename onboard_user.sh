@@ -26,7 +26,7 @@ fi
 
 #office-xxx@
 read -p "Which office (sfo, nyc, ber)? " office
-$gam update group office-$office ad user $username
+$gam update group office-$office add user $username
 
 #women@
 read -r -p "Should user be  part of women@ ? [y/n] " response
