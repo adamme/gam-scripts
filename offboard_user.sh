@@ -16,6 +16,11 @@ if [[ $response =~ [nN] ]]
 		exit
 fi
 
+#Should user's calendar be wiped? If so, it will be wiped later
+read -r -p "Do you want to Wipe $username's calendar? [y/n] "
+read cal_response
+
+#Starting deprovision
 echo "Deprovisioning " $username
 
 # Removing all mobile devices connected
@@ -53,16 +58,18 @@ unset IFS
 # user to send messages without reauthentication
 echo "Setting force change password on next logon and then disabling immediately to expire current session"
 $gam update user $username changepassword on
-sleep 2 && echo "Waiting for 2 seconds"
+sleep 2
 $gam update user $username changepassword off
 
 # Generating new set of MFA recovery codes for the user. Only used if Admin needed to log in as the user once suspended
 echo "Generating new 2SV Recovery Codes for $username"
+#Supressing the screen output
+{
 $gam user $username update backupcodes | tee -a /tmp/$username.log
+} &> /dev/null
 
-# Removing all of user's calendar events
-read -r -p "Do you want to Wipe "$username"'s calendar? [y/n] "
-if [[ $response =~ ^([y]|[Y] ]]
+# Removing all of user's calendar events if previously selected
+if [[ $cal_response =~ ^([y]|[Y] ]]
 then
 		echo "Deleting all of "$username"'s calendar events"
 		$gam calendar $email wipe | tee -a /tmp/$username.log
