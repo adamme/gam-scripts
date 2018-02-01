@@ -88,7 +88,7 @@ $gam user $username transfer drive data.archive@domain.com
 echo "Drive transfer complete" | tee -a /tmp/$username.log
 
 # Should User Account be Deleted?
-read -r -p "Do you want to Delete $username's account? [y/n] "
+read -r -p "Do you want to Delete $username's account? [y/n] " response
 if [[ $response =~ [yY] ]]
 then
     #Delete user
