@@ -97,7 +97,7 @@ then
     echo "Account $username deleted" | tee -a /tmp/$username.log
 
     #Add username as an alias to auto-responder account
-    $gam create alias $username user termination.admin@domain.com
+    $gam create alias $username user auto.responder@domain.com
     echo "alias set to auto-responder account" | tee -a /tmp/$username.log
 else
 		echo "Not deleting account" | tee -a /tmp/$username.log
