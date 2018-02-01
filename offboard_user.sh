@@ -92,6 +92,7 @@ $gam user $username transfer drive data.archive@domain.com
 echo "Drive transfer complete" | tee -a /tmp/$username.log
 
 
-## Printing Log location
-echo "Offboard complete for $username."
-echo "Temporary Log located at /tmp/$username.log"
+## Printing Log location and Upload to logs folder in data.archive@
+$gam user data.archive@domain.com add drivefile localfile /tmp/$username.log parentid (Drive folder ID here)
+echo "Offboard complete for $username"
+echo "Log file uploaded to data.archive@ log folder"
