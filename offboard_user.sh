@@ -17,7 +17,7 @@ if [[ $response =~ [nN] ]]
 fi
 
 #Should user's calendar be wiped? If so, it will be wiped later
-read -r -p "Do you want to Wipe $username's calendar? [y/n] "
+echo "Do you want to Wipe $username's calendar? [y/n] "
 read cal_response
 
 #Starting deprovision
