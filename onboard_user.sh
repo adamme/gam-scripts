@@ -22,10 +22,21 @@ if [[ $response =~ [yY] ]]
       exit
 fi
 
+#Move user to FTE Users (full-time employee) or TVC (temps/vendors/contractors) org
+read -r -p "Is this a FTE account? [y/n] " response
+if [[ $response =~ [yY] ]]
+  then
+      $gam update org Users add users $username
+  else
+  		$gam update org "Users/TVC (Temps Vendors Contractors)" add users $username
+      echo "Putting user in TVC org"
+      exit
+fi
+
 ##Add user to appropirate basic Google groups
 
 #office-xxx@
-read -p "Which office (sfo, nyc, ber)? " office
+read -p "Which office (sfo, nyc, ber, us-remote, international-remote)? " office
 $gam update group office-$office add user $username
 
 #women@
