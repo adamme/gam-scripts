@@ -57,9 +57,9 @@ unset IFS
 # Speculation that this will sign user out within 5 minutes and not allow
 # user to send messages without reauthentication
 echo "Setting force change password on next logon and then disabling immediately to expire current session"
-$gam update user $username changepassword on
+$gam update user $username changepassword on | tee -a /tmp/$username.log
 sleep 2
-$gam update user $username changepassword off
+$gam update user $username changepassword off | tee -a /tmp/$username.log
 
 # Generating new set of MFA recovery codes for the user. Only used if Admin needed to log in as the user once suspended
 echo "Generating new 2SV Recovery Codes for $username"
@@ -78,26 +78,30 @@ else
 fi
 
 # Suspending user
-echo "Setting $username to suspended"
+echo "Setting $username to suspended" | tee -a /tmp/$username.log
 $gam update user $username suspended on | tee -a /tmp/$username.log
-
-# Asks admin if they want to transfer docs to manager, if so, asks for manager's
-# google username and then initiate a gdrive file transfer
-# read -r -p "Do you want to transfer Google Drive to the manager? [y/N] " response
-# if [[ $response =~ ^([yY][eE][sS] |[yY][eE][sS])$ ]]
-#	then
-#		read -r -p "What is "$username"'s manager's username? " r_manager
-#		echo "Creating transfer to $r_manager"
-#		$gam create datatransfer $username gdrive $r_manager privacy_level shared,private | tee -a /tmp/$username.log
-#	else
-#		echo "Not transferring GDrive" | tee -a /tmp/$username.log
-# fi
+echo "Account $username suspendeded" | tee -a /tmp/$username.log
 
 #Transfer docs to data.archive@domain.company
 echo "Transfering Drive data to data.archive@domain.com"
 $gam user $username transfer drive data.archive@domain.com
 echo "Drive transfer complete" | tee -a /tmp/$username.log
 
+# Should User Account be Deleted?
+read -r -p "Do you want to Delete $username's account? [y/n] "
+if [[ $response =~ [yY] ]]
+then
+    #Delete user
+    echo "Deleting user $username" | tee -a /tmp/$username.log
+    $gam delete user $username | tee -a /tmp/$username.log
+    echo "Account $username deleted" | tee -a /tmp/$username.log
+
+    #Add username as an alias to auto-responder account
+    $gam create alias $username user termination.admin@domain.com
+    echo "alias set to auto-responder account" | tee -a /tmp/$username.log
+else
+		echo "Not deleting account" | tee -a /tmp/$username.log
+fi
 
 ## Printing Log location and Upload to logs folder in data.archive@
 $gam user data.archive@domain.com add drivefile localfile /tmp/$username.log parentid (Drive folder ID here)
