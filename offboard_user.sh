@@ -84,8 +84,8 @@ echo "Account $username suspendeded" | tee -a /tmp/$username.log
 
 #Transfer docs to data.archive@domain.company
 echo "Transfering Drive data to data.archive@domain.com"
-$gam user $username transfer drive data.archive@domain.com
-echo "Drive transfer complete" | tee -a /tmp/$username.log
+$gam create datatransfer $email gdrive data.archive@coreos.com
+echo "Drive transfer initiated" | tee -a /tmp/$username.log
 
 # Should User Account be Deleted?
 read -r -p "Do you want to Delete $username's account? [y/n] " response
