@@ -21,3 +21,6 @@ gam csv <csv-filename> gam update resource ~ID Function ~RelevantFunction
 
 Subscribe to all Resource Calendars
 gam user cal.admin@gdomain.com add calendar <calendar email> 
+
+Add Domain Share back for First Day of Business
+gam csv (csv-filename) gam calendar ~resourceEmail add domain
