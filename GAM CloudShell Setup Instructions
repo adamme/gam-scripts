@@ -1,5 +1,6 @@
 GAM + Cloudshell
 
+GAM Oauth Create: gam oauth create: https://github.com/jay0lee/GAM/wiki/CreatingClientSecretsFile#run-gam-to-authorize-the-client-api-scopes
 Setup in Cloud shell: https://ssh.cloud.google.com/cloudshell/environment/view
 Start at the docs here: https://github.com/jay0lee/GAM/wiki/CreatingClientSecretsFile#create-the-credentials-files
 Use a designated GCP project then install Google gloud SDK locally: https://cloud.google.com/storage/docs/gsutil_install
