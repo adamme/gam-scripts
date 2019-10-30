@@ -5,3 +5,8 @@ Setup in Cloud shell: https://ssh.cloud.google.com/cloudshell/environment/view
 Start at the docs here: https://github.com/jay0lee/GAM/wiki/CreatingClientSecretsFile#create-the-credentials-files
 Use a designated GCP project then install Google gloud SDK locally: https://cloud.google.com/storage/docs/gsutil_install
 Then use the alpha tool to ssh to your cloudshell instance: https://cloud.google.com/blog/products/gcp/introducing-the-ability-to-connect-to-cloud-shell-from-any-terminal
+
+
+Cloudshell directory needs to be Parent/bin/gam
+
+You may need to chown the .config when installing gcloud sdk tools
