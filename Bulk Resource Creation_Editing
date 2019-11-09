@@ -2,7 +2,7 @@ Either use the G Suite built-in bulk import, or create using csv file
 
 
 Create Resources
-gam csv <csv-filename> gam create resource ~ID ~RoomName type ~Type building ~Building capacity ~Occupancy features ~Features floor ~Floor category ~Category
+gam csv <csv-filename> gam create resource ~resourceID ~RoomName type ~Type building ~Building capacity ~Occupancy features ~Features floor ~Floor category ~Category
 
 Create one-off
 gam create resource ID#### "ROOM" type "Video Conferencing" building "BUILDING" capacity # features Telepresence floor 2 category CONFERENCE_ROOM
@@ -17,7 +17,7 @@ Add ACLs
 gam csv <filename> gam calendar ~resourceEmail add acls Editor ~Editors sendnotifications false
 
 Update resource Categories 
-gam csv <csv-filename> gam update resource ~ID Category "CONFERENCE_ROOM"
+gam csv <csv-filename> gam update resource ~resourceID Category "CONFERENCE_ROOM"
 
 Subscribe to Calendars
 gam user cal.admin@getcruise.com add calendar ~resourceEmail
