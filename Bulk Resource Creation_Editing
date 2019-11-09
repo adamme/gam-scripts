@@ -1,0 +1,35 @@
+Either use the G Suite built-in bulk import, or create using csv file
+
+
+Create Resources
+gam csv <csv-filename> gam create resource ~ID ~RoomName type ~Type building ~Building capacity ~Occupancy features ~Features floor ~Floor category ~Category
+
+Create one-off
+gam create resource ID#### "ROOM" type "Video Conferencing" building "BUILDING" capacity # features Telepresence floor 2 category CONFERENCE_ROOM
+
+Get Calendar ID Info
+gam print resources allfields todrive
+
+Remove Domain Share
+gam csv <csv-filename> gam calendar ~resourceEmail delete domain
+
+Add ACLs
+gam csv <filename> gam calendar ~resourceEmail add acls Editor ~Editors sendnotifications false
+
+Update resource Categories 
+gam csv <csv-filename> gam update resource ~ID Category "CONFERENCE_ROOM"
+
+Subscribe to Calendars
+gam user cal.admin@getcruise.com add calendar ~resourceEmail
+
+Add Domain Share back for First Day of Business
+gam csv (csv-filename) gam calendar ~resourceEmail add read domain
+
+Get Chromebox Serial/Mac
+gam print cros fields macAddress,orgUnitPath,serialNumber todrive
+
+Update Resource Names
+gam csv (csv-filename) gam update resource ~resourceID name ~newName
+
+Update Resource Capacities
+gam csv (csv-filename) gam update resource ~resourceID capacity ~capacity
