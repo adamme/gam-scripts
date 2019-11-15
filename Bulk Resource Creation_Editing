@@ -26,7 +26,7 @@ Add Domain Share back for First Day of Business
 gam csv (csv-filename) gam calendar ~resourceEmail add read domain
 
 Get Chromebox Serial/Mac
-gam print cros fields macAddress,orgUnitPath,serialNumber todrive
+gam print cros fields macAddress,ethernetmacaddress,orgUnitPath,serialNumber todrive
 
 Update Resource Names
 gam csv (csv-filename) gam update resource ~resourceID name ~newName
