@@ -1,7 +1,8 @@
 # Aliases
 alias gcp="gcloud alpha cloud-shell ssh"
-alias updategam="bash <(curl -s -S -L https://git.io/install-gam) -l"
-alias updategamadv="bash <(curl -s -S -L https://git.io/fhZWP) -l"
 alias gam="~/bin/gamadv-xtd3/gam"
+alias updategam="bash <(curl -s -S -L https://git.io/install-gam) -l; bash <(curl -s -S -L https://git.io/fhZWP) -l"
+alias updategamold="bash <(curl -s -S -L https://git.io/install-gam) -l"
+alias updategamadv="bash <(curl -s -S -L https://git.io/fhZWP) -l"
 alias oldgam="~/bin/gam/gam"
 alias gamold="oldgam"
