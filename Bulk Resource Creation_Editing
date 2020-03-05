@@ -33,3 +33,6 @@ gam csv (csv-filename) gam update resource ~resourceID name ~newName
 
 Update Resource Capacities
 gam csv (csv-filename) gam update resource ~resourceID capacity ~capacity
+
+Update CrOS Device Attributes
+gam csv (csv-filename) gam update cros cros_sn ~SerialNumber location ~location
