@@ -14,7 +14,7 @@ Remove Domain Share
 gam csv <csv-filename> gam calendar ~resourceEmail delete domain
 
 Add ACLs
-gam csv <filename> gam calendar ~resourceEmail add acls Editor ~Editors sendnotifications false
+gam csv <filename> gam calendar ~resourceEmail add Editor ~Editors sendnotifications false
 
 Update resource Categories 
 gam csv <csv-filename> gam update resource ~resourceID Category "CONFERENCE_ROOM"
