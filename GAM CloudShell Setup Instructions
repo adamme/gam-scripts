@@ -1,3 +1,24 @@
+Description
+GAM (Google Apps Manager) is an open source tool built by a Google employee but not supported or recognized by Google. 
+GAM uses an easy to use syntax to interact with G Suite APIs. Many actions are only available
+
+
+Instructions
+Open the “APIs & Services Credentials” to view the OAuth 2.0 Client IDs and Service Accounts for the GCP Project you are going to use with Google Cloud Shell. IT uses it-ops-dev
+https://console.cloud.google.com/apis/credentials?project=cruise-it-ops-dev-51de
+CreatingClientSecretsFile - Start on step3 - “Create credentials and choose OAuth client ID”
+https://github.com/jay0lee/GAM/wiki/CreatingClientSecretsFile#create-the-credentials-files
+Setup GAM AND/OR GAM-XTDin Google Cloud Shell: https://ssh.cloud.google.com/cloudshell/editor
+GAM: https://github.com/jay0lee/GAM/wiki
+GAM-XTD3: https://github.com/taers232c/GAMADV-XTD3/wiki/Downloads
+Authorize Client Scopes
+https://github.com/jay0lee/GAM/wiki/CreatingClientSecretsFile#run-gam-to-authorize-the-client-api-scopes
+Locally install Gcloud SDK tools on your laptop
+https://cloud.google.com/sdk/docs/quickstart-macos
+Setup SSH
+https://cloud.google.com/blog/products/gcp/introducing-the-ability-to-connect-to-cloud-shell-from-any-terminal
+
+
 GAM + Cloudshell
 
 GAM Oauth Create: gam oauth create: https://github.com/jay0lee/GAM/wiki/CreatingClientSecretsFile#run-gam-to-authorize-the-client-api-scopes
@@ -10,3 +31,6 @@ Then use the alpha tool to ssh to your cloudshell instance: https://cloud.google
 Cloudshell directory needs to be Parent/bin/gam
 
 You may need to chown the .config when installing gcloud sdk tools
+
+
+
