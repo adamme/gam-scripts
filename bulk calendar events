@@ -1,0 +1,3 @@
+Using Sheet formulas to generate commands
+
+=CONCATENATE("gam user <creatorEmail> add event ",<calendarID>," attendee ",<attendeeConcatenation>," summary """,<eventTitle>,""" start ",startDateTime," end ",endDateTime, " guestscantinviteothers visibility private")
