@@ -7,3 +7,4 @@ alias updategam="bash <(curl -s -S -L https://git.io/install-gam) -l; bash <(cur
 alias updategamold="bash <(curl -s -S -L https://git.io/install-gam) -l"
 alias updategamadv="bash <(curl -s -S -L https://git.io/fhZWP) -l"
 alias gyb='~/bin/gyb/gyb'
+alias count="~/scripts/get_license_count.sh"
