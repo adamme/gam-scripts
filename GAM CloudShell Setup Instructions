@@ -2,6 +2,8 @@ Description
 GAM (Google Apps Manager) is an open source tool built by a Google employee but not supported or recognized by Google. 
 GAM uses an easy to use syntax to interact with G Suite APIs. Many actions are only available
 
+Fairly basic good instructions
+https://basuta.com/posts/installing-google-apps-manager-gam-on-google-cloud-shell/
 
 Instructions
 Open the “APIs & Services Credentials” to view the OAuth 2.0 Client IDs and Service Accounts for the GCP Project you are going to use with Google Cloud Shell. IT uses it-ops-dev
