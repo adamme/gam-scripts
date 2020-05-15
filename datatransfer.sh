@@ -1,7 +1,7 @@
 #!/bin/bash
 #This script performs various onboarding tasks when a user joins the company.
 
-gam="$HOME/bin/gam/gam"
+gam="$HOME/bin/gamadv-xtd3/gam"
 
 #Gather who to transfer data from and to
 echo "Transfer from: "
