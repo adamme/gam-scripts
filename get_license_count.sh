@@ -3,8 +3,8 @@
 gam="sudo $HOME/bin/gam/gam"
 
 #find license max and user count for Google Workspace Enterprise Licenses
-licensemax=$($gam info domain | grep 'Google Workspace Enterprise Plus Licenses' | tr -cd '0-9')
-usercount=$($gam info domain | grep 'Google Workspace Enterprise Plus Users' | tr -cd '0-9')
+licensemax=$($gam info domain | grep 'Workspace Enterprise Plus Licenses' | tr -cd '0-9')
+usercount=$($gam info domain | grep 'Workspace Enterprise Plus Users' | tr -cd '0-9')
 
 #calculate and print available G Suite user licenses, then store in txt file
 licensecount=$(expr $licensemax - $usercount)
