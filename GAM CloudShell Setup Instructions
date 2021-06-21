@@ -7,7 +7,7 @@ https://basuta.com/posts/installing-google-apps-manager-gam-on-google-cloud-shel
 
 Instructions
 Open the “APIs & Services Credentials” to view the OAuth 2.0 Client IDs and Service Accounts for the GCP Project you are going to use with Google Cloud Shell. IT uses it-ops-dev
-https://console.cloud.google.com/apis/credentials?project=cruise-it-ops-dev-51de
+https://console.cloud.google.com/apis/credentials?project=project-name
 CreatingClientSecretsFile - Start on step3 - “Create credentials and choose OAuth client ID”
 https://github.com/jay0lee/GAM/wiki/CreatingClientSecretsFile#create-the-credentials-files
 Setup GAM AND/OR GAM-XTDin Google Cloud Shell: https://ssh.cloud.google.com/cloudshell/editor
