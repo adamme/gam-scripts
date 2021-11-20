@@ -1,0 +1,256 @@
+#taken from this document: goo.gl/DXmmsB
+
+
+How to set nicely formatted signatures on staff users currently without signatures
+
+This needs to be done in a few steps since there’s no straightforward way to do this with users spread out like ours are. I will be using GAMADV-XTD3, a fork of GAM. The instructions below will explain how to do each step, but when it’s set up, they will all run automatically on a schedule.
+First, create a list of OUs where all our staff accounts reside.
+#Print all OUs, and then edit that list to only contain staff OUs
+
+gam print orgs > medarbetare.csv
+
+mcedit medarbetare.csv
+
+F8 away all OUs with students and other irrelevant OUs.
+Second, print all current users and their signatures.
+#Grab all signatures for staff
+
+gam redirect csv ./staff_signatures.csv multiprocess csv medarbetare.csv gam ou ~OU print signature
+
+Using the edited medarbetare.csv file as base, we print all users signatures, and parse them all into a single staff_signatures.csv file with the redirect and multiprocess options. The ./ part of the filename is to make sure the file is created locally.
+Filter out users without signatures, and print their user info as base for their signatures.
+#Getting user data for users without signatures
+
+gam csvkmd users ./staff_signatures.csv keyfield User matchfield isPrimary True skipfield signature '.+' print fields name,organizations,ou > UsersWithoutSignaturesOU.csv
+
+With staff_signatures.csv as base we filter each User where the field isPrimary is empty, pushing only signature-less users to the print fields command, saving their fields content to the UsersWithoutSignaturesOU.csv file.
+
+Now we have all the user info we need to push that data into users’ unique signatures. Now we just need a properly formatted signature template. I started out with the signatures that I copied from two prominent users in our organization, the CIO and the central Tech Coordinator, and mixed them together, replacing and removing some things to get a base.
+
+There’s lots of room for changing the static content, but we only have a limited amount of dynamic content to play with, which is why my base has less info than theirs. I left the static text of the phone number in there, just to show that we could’ve pushed it, if we had it.
+Setting up the signature template for each root OU
+Since we have users of different categories in separate root OUs I had to create four separate signature templates to control their separate signatures. Three of them are basically the same, since they refer to users in the primary domain and main brand, Kunskapsskolan with kunskapsskolan.se, and the last is for Kunskapsgymnasiet with kunskapsgymnasiet.se as staff domain.
+
+The separation, despite three being the same, is quite on purpose, because someday we might decide that they should not have the same signature, and then it’s already prepared.
+
+All signatures have to be set using html code on a single line. No multiline code allowed.
+
+I’ve highlighted the relevant replace {tags} in each signature below with bold. These are the bits that will be dynamically replaced with user info from the previous command. Adding the {RT}{/RT} around a {tag} will skip the tag, if the user has no such info, so as to not leave an ugly empty space in the signature. Don’t forget to include spaces and commas when RT-ing.
+
+Admins
+
+<div style="color:rgb(0,0,0);font-family:Tahoma"><p>Bästa hälsningar,</p><p><b>{first} {last}</b><br />{RT}{title}, {/RT}{RT}{arbetsplats}{/RT}</p><p><img src="https://www.kunskapsskolan.se/images/18.602b4b63150278964572363/1443776525030/Grundskolan_colour_RGB_345x70.png" width="200" height="35"></p><br>Tel: NoTfnInUserInfo<br><a href="mailto:{email}" title="mailto:{email}">{email}</a><br /><a href="https://www.kunskapsskolan.se" title="https://www.kunskapsskolan.se" target="_blank">kunskapskolan.se</a></br /></div><p><font size="1"><font color="#999999">När du kommunicerar med Kunskapsskolan i Sverige AB via e-post kommer dina uppgifter att behandlas av Kunskapsskolan. All hantering av personuppgifter i e-post sker i enlighet med gällande dataskyddslagstiftning. Du kan läsa mer om Kunskapsskolan i Sverige AB:s hantering av personuppgifter på</font><br><font color="#1155cc"><a href="https://foretaget.kunskapsskolan.se/omforetaget/kunskapsskolanspersonuppgiftsbehandling" style="color:rgb(17,85,204)" target="_blank">https://foretaget.kunskapsskolan.se/omforetaget/kunskapsskolanspersonuppgiftsbehandling</a></font></font></p>
+
+So, the parts we are replacing are the following.
+first} {last} - obviously the users’ names
+{title} - this is the title or profession of the user
+{arbetsplats} - this is where in the organisation the person works, usually name of school
+
+We could replace more info if we choose to sync more info into the users’ accounts. Then we just need to add more tags, and gam print more fields earlier on.
+Grundskolor
+
+<div style="color:rgb(0,0,0);font-family:Tahoma"><p>Bästa hälsningar,</p><p><b>{first} {last}</b><br />{RT}{title}, {/RT}{RT}{arbetsplats}{/RT}</p><p><img src="https://www.kunskapsskolan.se/images/18.602b4b63150278964572363/1443776525030/Grundskolan_colour_RGB_345x70.png" width="200" height="35"></p><br>Tel: NoTfnInUserInfo<br><a href="mailto:{email}" title="mailto:{email}">{email}</a><br /><a href="https://www.kunskapsskolan.se" title="https://www.kunskapsskolan.se" target="_blank">kunskapskolan.se</a></br /></div><p><font size="1"><font color="#999999">När du kommunicerar med Kunskapsskolan i Sverige AB via e-post kommer dina uppgifter att behandlas av Kunskapsskolan. All hantering av personuppgifter i e-post sker i enlighet med gällande dataskyddslagstiftning. Du kan läsa mer om Kunskapsskolan i Sverige AB:s hantering av personuppgifter på</font><br><font color="#1155cc"><a href="https://foretaget.kunskapsskolan.se/omforetaget/kunskapsskolanspersonuppgiftsbehandling" style="color:rgb(17,85,204)" target="_blank">https://foretaget.kunskapsskolan.se/omforetaget/kunskapsskolanspersonuppgiftsbehandling</a></font></font></p>
+
+Gymnasium
+
+<div style="color:rgb(0,0,0);font-family:Tahoma"><p>Bästa hälsningar,</p><p><b>{first} {last}</b><br />{RT}{title}, {/RT}{RT}{arbetsplats}{/RT}</p><p><img src="https://www.kunskapsgymnasiet.se/images/18.1aafddec150110354532f6b3/1443776093818/Gymnasiet_colour_RGB_350x60.png" width="200" height="35"></p><br>Tel: NoTfnInUserInfo<br><a href="mailto:{email}" title="mailto:{email}">{email}</a><br /><a href="https://www.kunskapsgymnasiet.se" title="https://www.kunskapsgymnasiet.se" target="_blank">kunskapsgymnasiet.se</a></br /></div><p><font size="1"><font color="#999999">När du kommunicerar med Kunskapsskolan i Sverige AB via e-post kommer dina uppgifter att behandlas av Kunskapsskolan. All hantering av personuppgifter i e-post sker i enlighet med gällande dataskyddslagstiftning. Du kan läsa mer om Kunskapsskolan i Sverige AB:s hantering av personuppgifter på</font><br><font color="#1155cc"><a href="https://foretaget.kunskapsskolan.se/omforetaget/kunskapsskolanspersonuppgiftsbehandling" style="color:rgb(17,85,204)" target="_blank">https://foretaget.kunskapsskolan.se/omforetaget/kunskapsskolanspersonuppgiftsbehandling</a></font></font></p>
+
+Huvudkontor
+
+<div style="color:rgb(0,0,0);font-family:Tahoma"><p>Bästa hälsningar,</p><p><b>{first} {last}</b><br />{RT}{title}, {/RT}{RT}{arbetsplats}{/RT}</p><p><img src="https://www.kunskapsskolan.se/images/18.602b4b63150278964572363/1443776525030/Grundskolan_colour_RGB_345x70.png" width="200" height="35"></p><br>Tel: NoTfnInUserInfo<br><a href="mailto:{email}" title="mailto:{email}">{email}</a><br /><a href="https://www.kunskapsskolan.se" title="https://www.kunskapsskolan.se" target="_blank">kunskapskolan.se</a></br /></div><p><font size="1"><font color="#999999">När du kommunicerar med Kunskapsskolan i Sverige AB via e-post kommer dina uppgifter att behandlas av Kunskapsskolan. All hantering av personuppgifter i e-post sker i enlighet med gällande dataskyddslagstiftning. Du kan läsa mer om Kunskapsskolan i Sverige AB:s hantering av personuppgifter på</font><br><font color="#1155cc"><a href="https://foretaget.kunskapsskolan.se/omforetaget/kunskapsskolanspersonuppgiftsbehandling" style="color:rgb(17,85,204)" target="_blank">https://foretaget.kunskapsskolan.se/omforetaget/kunskapsskolanspersonuppgiftsbehandling</a></font></font></p>
+
+All these templates can be edited to contain pretty much anything. Main concern is to not make them too heavy or intense, since everybody have to send them all the time, and see everybody else’s in their inbox. Make sure to not drop {} around tags, and use {RT}{/RT} around tags or areas where you suspect users may not have any values for that tag.
+
+The next step is the actual setting of the signatures.
+
+Update signatures for users in different root OUs
+Since we have users of different categories in separate root OUs I had to create four separate commands to control their separate signatures, and their respective content.
+
+#Update signatures for users in Admins
+gam csv UsersWithoutSignaturesOU.csv matchfield orgUnitPath "^/Admins.*" gam user ~primaryEmail signature file SigTemplate_Admins.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+
+#Update signatures for users in Grundskolor
+gam csv UsersWithoutSignaturesOU.csv matchfield orgUnitPath "^/Grundskolor.*" gam user ~primaryEmail signature file SigTemplate_Grundskolor.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+
+#Update signatures for users in Gymnasium
+gam csv UsersWithoutSignaturesOU.csv matchfield orgUnitPath "^/Gymnasium.*" gam user ~primaryEmail signature file SigTemplate_Gymnasium.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+
+#Update signatures for users in Huvudkontor
+gam csv UsersWithoutSignaturesOU.csv matchfield orgUnitPath "^/Huvudkontor.*" gam user ~primaryEmail signature file SigTemplate_Huvudkontor.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+
+The two things that differ are the reference to the user’s root OU, and which template to use. Now, if ever the OU structure were to change, one has to take that into account here.
+
+Each command pulls users from the same UsersWithoutSignaturesOU.csv file with the differing initial orgUnitPath name, and assigns them their signature based on the corresponding SigTemplate_X.txt.
+
+
+Scheduling this to run automatically
+Yes, of course none of this should be done by hand. It should all be set to run on a semi-regular basis. Using crontab on a Google Cloud Shell Compute Engine VM running a single tbatch script should keep new users’ signatures in check with the desired standard.
+
+# m h  dom mon dow   command
+7 0 1 * * /home/user/gamadv-xtd3/gam tbatch set_signatures_for_staff.txt
+
+The single tbatch script for GAMADV-XTD3 should look like this.
+
+#Grab all signatures for staff
+gam redirect csv ./staff_signatures.csv multiprocess csv medarbetare.csv gam ou ~OU print signature
+commit-batch
+#Getting user data for users without signatures
+gam csvkmd users ./staff_signatures.csv keyfield User matchfield isPrimary True skipfield signature '.+' print fields name,organizations,ou > UsersWithoutSignatures_lessfields_OU.csv
+commit-batch
+#Update signatures for users in Admins
+gam csv UsersWithoutSignatures_lessfields_OU.csv matchfield orgUnitPath "^/Admins.*" gam user ~primaryEmail signature file SigTemplate_Admins.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+commit-batch
+#Update signatures for users in Grundskolor
+gam csv UsersWithoutSignatures_lessfields_OU.csv matchfield orgUnitPath "^/Grundskolor.*" gam user ~primaryEmail signature file SigTemplate_Grundskolor.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+commit-batch
+#Update signatures for users in Gymnasium
+gam csv UsersWithoutSignatures_lessfields_OU.csv matchfield orgUnitPath "^/Gymnasium.*" gam user ~primaryEmail signature file SigTemplate_Gymnasium.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+commit-batch
+#Update signatures for users in Huvudkontor
+gam csv UsersWithoutSignatures_lessfields_OU.csv matchfield orgUnitPath "^/Huvudkontor.*" gam user ~primaryEmail signature file SigTemplate_Huvudkontor.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+Now for some testing!
+To be able to test all this we can’t use all our users as base; that’d be too risky.
+
+Instead I have created a smaller staff without signatures file with less users, and their info, to run signature setting on, while editing and perfecting the signature.
+
+#Test command with reference to a smaller staff-sig file.
+gam csvkmd users ./fewer_staff_signatures.csv keyfield User matchfield isPrimary True skipfield signature '.+' print fields name,organizations,ou > TEST-UsersWithoutSignatures_lessfields_OU.csv
+
+The content of the fewer_staff_signatures.csv file is fake, since many those accounts already have signatures, but we are sacrificing them for this test. It looks something like this, but with more users.
+
+User,displayName,sendAsEmail,replyToAddress,isPrimary,isDefault,treatAsAlias,verificationStatus,signature
+sebtestelev@kunskapsskolan.se,,sebtestelev@kunskapsskolan.se,,True,True,,,
+testprog@kunskapsskolan.se,,testprog@kunskapsskolan.se,,True,True,,,
+test.kim@kunskapsgymnasiet.se,test.kim@kunskapsgymnasiet.se,,True,True,,,
+
+
+Running that command will create a test file, TEST-UsersWithoutSignatures_lessfields_OU.csv which we will use as the base of the, again, fake set-signature command. Yes, we’re staying away from the real commands listed above, to make sure we don’t mess up all current users’ signatures. That content looks like this, with more users.
+
+primaryEmail,name.givenName,name.familyName,name.fullName,organizations,orgUnitPath,organizations.0.title,organizations.0.department,organizations.0.primary,organizations.0.customType,organizations.0.description,organizations.0.name
+sebtestelev@kunskapsskolan.se,sebtest,elev,sebtest elev,,/Admins,,,,,,
+testprog@kunskapsskolan.se,test,programmering,test programmering,1,/Admins,Programmeringskonto Test Kursstart HT 2017,,True,,,
+test.kim@kunskapsgymnasiet.se,Test,Kim KG,Test Kim KG,1,/Grundskolor/Varberg/Medarbetare,Testkonto KG,Testkonto,True,,Testkonto,
+
+As you can see, the point is to get the OU reference with each user, so we can set the different SigTemplates in the actual set-sig command.
+
+
+
+Testing the setting of signatures
+For each of these commands it will force a new signature, based on the OU of the user, and the referred SigTemplate.
+
+#Admins
+gam csv TEST-UsersWithoutSignatures_lessfields_OU.csv matchfield orgUnitPath "^Admins.*" gam user ~primaryEmail signature file SigTemplate_Admins.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+
+#Grundskolor
+gam csv TEST-UsersWithoutSignatures_lessfields_OU.csv matchfield orgUnitPath "^Grundskolor.*" gam user ~primaryEmail signature file SigTemplate_Grundskolor.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+
+#Gymnasium
+gam csv TEST-UsersWithoutSignatures_lessfields_OU.csv matchfield orgUnitPath "^Gymnasium.*" gam user ~primaryEmail signature file SigTemplate_Gymnasium.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+
+#Huvudkontor
+gam csv TEST-UsersWithoutSignatures_lessfields_OU.csv matchfield orgUnitPath "^Huvudkontor.*" gam user ~primaryEmail signature file SigTemplate_Huvudkontor.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+
+
+How to view someone’s signature, in different formats.
+
+GAMADV-XTD3 has several ways of displaying a user’s signature, for different purposes.
+
+gam user username@domain show signature html
+Show the actual html code in the user’s signature. Yes, including horrible multilines.
+
+gam user username@domain show signature compact
+Show what it should look like, if it was all in a single line, as signature code should be.
+
+gam user username@domain show signature format
+Show what it looks like when a user receives such a signature, sans the images.
+
+Se the next following pages for examples.
+
+The results are like this. (The names have been changed to protect the innocent.)
+
+gam user username@domain show signature html
+
+$ gamx user FirstName.LastName@kunskapsskolan.se show signature html
+SendAs Address: <FirstName.LastName@kunskapsskolan.se>
+  IsPrimary: True
+  Default: True
+  Signature:
+    <div dir="ltr"><div><div dir="ltr"><div><div dir="ltr"><div><div dir="ltr"><div dir="ltr"><div dir="ltr"><div><p><a name="SafeHtmlFilter_UNIQUE_ID_SafeHtmlFilter_UNIQUE_ID_SafeHtmlFilter__MailAutoSig"><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">FirstName
+    LastName</span></a></p>
+
+    <p><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">Dude's first title</span></p><p><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">Dude's second title</span></p>
+
+    <p><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">Kunskapsskolan i Sverige AB <br>
+    Box 92146, 120 08 Stockholm<br></span><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif">Hammarby Fabriksväg
+    23, plan 6<span style="color:#7f7f7f"></span></span></p>
+
+    <p><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">tfn: Dude's phone number<br>
+    </span><a href="mailto:FirstName.LastName@kunskapsskolan.se" target="_blank"><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:blue">FirstName.LastName@kunskapsskolan.se</span></a><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f"> <br>
+    </span><a href="http://www.kunskapsskolan.se/" title="http://www.kunskapsskolan.se/" target="_blank"><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">kunskapsskolan.se</span></a><span style="color:#7f7f7f"></span></p>
+
+    <p><span style="color:#7f7f7f"><img border="0" width="150" height="27" alt="Foretag_black_RGB_150"></span><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f"></span></p></div><div><br></div></div></div></div></div></div></div></div></div></div>
+
+gam user username@domain show signature compact
+
+$ gamx user FirstName.LastName@kunskapsskolan.se show signature compact
+SendAs Address: <FirstName.LastName@kunskapsskolan.se>
+  IsPrimary: True
+  Default: True
+  Signature: <div dir="ltr"><div><div dir="ltr"><div><div dir="ltr"><div><div dir="ltr"><div dir="ltr"><div dir="ltr"><div><p><a name="SafeHtmlFilter_UNIQUE_ID_SafeHtmlFilter_UNIQUE_ID_SafeHtmlFilter__MailAutoSig"><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">FirstName\nLastName</span></a></p>\n\n<p><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">Dude's first title</span></p><p><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">Dude's second title</span></p>\n\n<p><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">Kunskapsskolan i Sverige AB <br>\nBox 92146, 120 08 Stockholm<br></span><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif">Hammarby Fabriksväg\n23, plan 6<span style="color:#7f7f7f"></span></span></p>\n\n<p><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">tfn: Dude's phone number<br>\n</span><a href="mailto:FirstName.LastName@kunskapsskolan.se" target="_blank"><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:blue">FirstName.LastName@kunskapsskolan.se</span></a><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f"> <br>\n</span><a href="http://www.kunskapsskolan.se/" title="http://www.kunskapsskolan.se/" target="_blank"><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f">kunskapsskolan.se</span></a><span style="color:#7f7f7f"></span></p>\n\n<p><span style="color:#7f7f7f"><img border="0" width="150" height="27" alt="Foretag_black_RGB_150"></span><span style="font-size:7.5pt;font-family:&quot;Arial&quot;,sans-serif;color:#7f7f7f"></span></p></div><div><br></div></div></div></div></div></div></div></div></div></div>
+
+gam user username@domain show signature format
+
+$ gamx user FirstName.LastName@kunskapsskolan.se show signature format
+SendAs Address: <FirstName.LastName@kunskapsskolan.se>
+  IsPrimary: True
+  Default: True
+  Signature:
+    FirstName
+    LastName
+
+    Dude's first title
+
+    Dude's second title
+
+    Kunskapsskolan i Sverige AB
+
+    Box 92146, 120 08 Stockholm
+    Hammarby Fabriksväg
+    23, plan 6
+
+    tfn: Dude's phone number
+
+    (mailto:FirstName.LastName@kunskapsskolan.se) FirstName.LastName@kunskapsskolan.se
+
+    (http://www.kunskapsskolan.se/) kunskapsskolan.se
+
+Set signatures on all newly created staff accounts
+
+As we progressed through this project it was established that what was really sought after was an automatic way to set a standard signature on every new account right after its conception. So this is how that is done.
+
+We use the Reports feature, catching newly created users, printing their user info as base for their auto-signature.
+
+gam redirect csv ./newusers.csv report admin event CREATE_USER start -2h
+
+This prints the admin report, and filtering create user events from the last two hours.
+
+gam redirect csv ./newusersinfo.csv csvkmd users newusers.csv keyfield parameters.0.value matchfield name CREATE_USER matchfield parameters.0.name USER_EMAIL skipfield parameters.0.value "^.*u\w{2}\d{4}@edu.*$" print users allfields
+
+This uses the previously created list of new users as base for the print of these users stored attributes.
+
+From here we grab the syntax from the initial process. (I will only show one example.)
+
+#Update signatures for newly created users in Grundskolor
+gam csv newusersinfo.csv matchfield orgUnitPath "^/Grundskolor.*" gam user ~primaryEmail signature file SigTemplate_Grundskolor.txt html replace first ~name.givenName replace last ~name.familyName replace title ~organizations.0.title replace arbetsplats ~organizations.0.department replace email ~primaryEmail
+
+
+Find all users with more than one signature/SendAs
+
+First let’s find all with more than one SendAs.
+gamx redirect csv ./staff_sendas.csv multiprocess csv medarbetare.csv gam ou ~OU print sendas todrive
+
+This will create the csv file staff_sendas.csv, but also push the data to a Google Sheet, for easier editing.
+
+Let’s find all with more than one signature. Yes, this is the same command as in the beginning, but we’re pushing it to a Sheet now, so we can act on the content.
+
+gamx redirect csv ./staff_signatures.csv multiprocess csv medarbetare.csv gam ou ~OU print signature todrive
