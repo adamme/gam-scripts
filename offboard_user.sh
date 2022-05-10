@@ -107,3 +107,7 @@ fi
 $gam user data.archive@domain.com add drivefile localfile /tmp/$username.log parentid (Drive folder ID here)
 echo "Offboard complete for $username"
 echo "Log file uploaded to data.archive@ log folder"
+
+## Print log contents to Slack via webhook
+curl -X POST -H --silent --data-urlencode "payload={\"text\": \"$(cat /tmp/$username.log | sed "s/\"/'/g")\"}" https://hooks.slack.com/services/uniquekeyhere
+
