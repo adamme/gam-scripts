@@ -43,15 +43,8 @@ echo "Checking and Removing all of "$username"'s Application Specific Passwords,
 $gam user $username deprovision | tee -a /tmp/$username.log
 
 # Removing user from all Groups
-echo "Gathering group information for $username"
-amount_of_groups="$($gam info user $username | grep "Groups: (" | sed 's/[^0-9]//g')"
-IFS=$'\n'
-groups_list=($($gam info user $username | grep -A $amount_of_groups Groups | grep -v Groups | sed 's/^[^<]*<//g' | sed 's/\@.*$//g'))
-unset IFS
-	for group_name in ${groups_list[@]}
-		do
-			$gam update group $group_name remove user $username && echo "Removed $username from $group_name"
-	done | tee -a /tmp/$username.log
+$gam user $username delete groups
+echo $username " Removed from all Google groups" | tee -a /tmp/$username.log
 
 # Forcing change password on next sign-in and then disabling immediately.
 # Speculation that this will sign user out within 5 minutes and not allow
