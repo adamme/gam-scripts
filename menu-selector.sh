@@ -1,6 +1,6 @@
 #!/bin/bash
 #This script performs various tasks.
-#The commands involve email delegation, forwarding email, file ownership/transfer, calendar permissions, and out of office messages.
+#The commands involve email delegation, forwarding email, file or drive ownership/transfer, calendar permissions or transfer, and out of office messages.
 
 gam="$HOME/bin/gamadv-xtd3/gam"
 
@@ -12,7 +12,7 @@ gam="$HOME/bin/gamadv-xtd3/gam"
 echo "Please type a number to run the following (example: 1)
     >1. Email delegation 
     >2. Forwarding Email
-    >3. Check file ownership
+    >3. File / Drive
     >4. Shared calendars / Calendar permissions
     >5. Vacation / Out of Office message"
     read menuselection
@@ -201,13 +201,15 @@ if [[ $menuselection =~ [2] ]]
 	
     fi # End $menuselection 2 IF statement
 
-# Executing check file ownership / transfer file ownership
+# Executing File / Drive menu
 if [[ $menuselection =~ [3] ]]
 	then
 	
 	# Enter file menu option
 	echo "Please type a number to run the following (example: 1)
-	>1. Check file ownership"
+	>1. Check file ownership
+	>2. Transfer file ownership
+	>3. Transfer entire Drive"
 	read filemenuselection
 	
 	# Executing check file ownership 
@@ -231,8 +233,63 @@ if [[ $menuselection =~ [3] ]]
 		$gam show ownership $fileID
 		
 		fi # End $filemenuselection 1 IF statement
-
+		
 	# Executing transfer file ownership 
+	if [[ $filemenuselection =~ [2] ]]
+		then 
+		
+		echo "Enter the current Owner's email address : "
+		read currentowner
+		
+		echo "Enter the email address you want to transfer file ownership to: "
+		read newowner
+		
+		echo "Enter the FileID you would like to transfer: "
+		read fileID
+		
+		# Confirm file ownership check
+		read -r -p "
+		Current Owner: $currentowner
+		New Owner: $newowner
+		FileID: $fileID 
+		
+		Do you wish to transfer the ownership of the file? [y/n] " response
+		
+		if [[ $response =~ [nN] ]]
+			then
+				echo "User selected No. Exiting..."
+				return
+			fi # End IF
+
+		# Transfer file ownership
+		$gam user $currentowner add drivefileacl $fileID user $newowner role owner
+		
+		fi # End $filemenuselection 2 IF statement
+
+	# Executing Drive transfer 
+	if [[ $filemenuselection =~ [3] ]]
+		then 
+		
+		# Enter user email
+		echo "Enter the email address you would like to transfer the Drive for: "
+		read username
+		
+		#Enter transfer email
+		echo "Enter the email address you would like to transfer Drive ownership to: "
+		read transferemail
+		
+		# Confirm Transfer Drive ownership
+		read -r -p "Do you wish to transfer $username 's Google Drive ownership to $transferemail ? [y/n] " response
+		if [[ $response =~ [nN] ]]
+			then
+				echo "User selected No. Exiting..."
+				return
+			fi # End IF
+			
+		# Transfer Google Drive ownership
+		$gam create datatransfer $username drive $transferemail all
+		
+		fi # End $filemenuselection 3 IF statement
 
 	fi # End $menuselection 3 IF statement
 
@@ -244,7 +301,8 @@ if [[ $menuselection =~ [4] ]]
 	echo "Please type a number to run the following (example: 1)
 	>1. Check user's calendar access
 	>2. Check access permissions for a calendar
-	>3. Add or update calendar permissions"
+	>3. Add or update calendar permissions
+	>4. Transfer entire Calendar"
 	read calendarmenuselection
     
     	# Executing Check user's calendar access
@@ -255,7 +313,14 @@ if [[ $menuselection =~ [4] ]]
 		echo "Enter the email address you wish to check calendar access for: "
 		read username
 
-        read -r -p "Do you want this information in Google Sheets ? [y/n] " todriveresponse
+        read -r -p "Is $username a user or group? [user/group] ] " usertype 
+			if [[ $usertype != [uU][sS][eE][rR] ]] && [[ $usertype != [gG][rR][oO][uU][pP] ]] 
+				then
+					echo "Incorrect option. Exiting..."
+					return
+				fi # End IF
+				
+		read -r -p "Do you want this information in Google Sheets ? [y/n] " todriveresponse
 
         read -r -p "Do you wish to check the calendars for $username ? [y/n] " response
 		if [[ $response =~ [nN] ]]
@@ -269,13 +334,13 @@ if [[ $menuselection =~ [4] ]]
 		# Yes - to drive option
 		[yY])
 			# Check calendar access for specific user and upload spreadsheet to Google Drive
-		    $gam user $username print calendars showhidden todrive
+		    $gam $usertype $username print calendars showhidden todrive
 			;;
 		
         # No - print to GAM option
         [nN])
 		    # Check calendar access for specific user
-		    $gam user $username print calendars showhidden
+		    $gam $usertype $username print calendars showhidden
             ;;
 
         # Incorrect option; exit
@@ -308,7 +373,7 @@ if [[ $menuselection =~ [4] ]]
 		
 		fi # End $calendarmenuselection IF 2 statement
 
-	# Executing Add calendar permissions
+	# Executing Add / Update calendar permissions
 	if [[ $calendarmenuselection =~ [3] ]] 
 		then 
 		
@@ -376,6 +441,31 @@ if [[ $menuselection =~ [4] ]]
 		esac # End $addupdate Case Statement
 		
 		fi # End $calendarmenuselection IF 3 statment
+		
+	# Executing Transfer calendar 
+	if [[ $calendarmenuselection =~ [4] ]]
+		then 
+		
+		# Enter user email
+		echo "Enter the email address you would like to transfer the Calendar for: "
+		read calendaremail
+		
+		#Enter transfer email
+		echo "Enter the email address you would like to transfer Calendar ownership to: "
+		read transferemail
+		
+		# Confirm Transfer calendar ownership
+		read -r -p "Do you wish to transfer $calendaremail 's calendar ownership to $transferemail ? [y/n] " response
+		if [[ $response =~ [nN] ]]
+			then
+				echo "User selected No. Exiting..."
+				return
+			fi # End IF
+			
+		# Check access permissions for a calendar
+		$gam create datatransfer $username calendar $transferemail releaseresources
+		
+		fi # End $calendarmenuselection IF 4 statement
     
     fi # End $menuselection IF 4 statement
 
