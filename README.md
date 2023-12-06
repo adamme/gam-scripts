@@ -1,2 +1,2 @@
 # gam-scripts
-Bash scripts to help with using gam for Google G Suite administration. 
+Bash scripts to help with using gam for Google Workspace administration. 
