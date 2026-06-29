@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# GAMADV-XTD3 Workspace admin menu.
+# GAM7 Workspace admin menu.
 # Tasks: email delegation, forwarding, file/Drive transfer, calendar
 # permissions/transfer, out-of-office, and org-wide message removal.
 #
@@ -11,7 +11,7 @@
 
 set -uo pipefail
 
-gam="$HOME/bin/gamadv-xtd3/gam"
+gam="$HOME/bin/gam7/gam"
 
 CHOICE=-1     # set by menu_select: index >= 0, -1 = back, -2 = quit
 QUIT=0        # set to 1 by a submenu when the user chooses quit
