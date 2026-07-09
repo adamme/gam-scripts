@@ -13,6 +13,10 @@ set -uo pipefail
 
 gam="$HOME/bin/gam7/gam"
 
+# Set this to your own email. It's used as the "press Enter" default when
+# granting document access (since that's usually you).
+ME="CHANGE-ME@domain.com"
+
 CHOICE=-1     # set by menu_select: index >= 0, -1 = back, -2 = quit
 QUIT=0        # set to 1 by a submenu when the user chooses quit
 TOPLEVEL=0    # 1 only while the main menu is drawing (suppresses the back hint)
@@ -37,15 +41,15 @@ menu_select() {
         printf '\033[1m%s\033[0m\033[K\n\n' "$title"
         for ((i = 0; i < n; i++)); do
             if ((i == sel)); then
-                printf '  \033[36m›\033[0m \033[7m %s \033[0m\033[K\n' "${options[i]}"
+                printf '  \033[36m›\033[0m \033[7m %d. %s \033[0m\033[K\n' "$((i + 1))" "${options[i]}"
             else
-                printf '    %s\033[K\n' "${options[i]}"
+                printf '    %d. %s\033[K\n' "$((i + 1))" "${options[i]}"
             fi
         done
         if ((TOPLEVEL)); then
-            printf '\n\033[2m  up/down move - Enter select - q quit\033[0m\033[K\n'
+            printf '\n\033[37m  (q) to quit\033[0m\033[K\n'
         else
-            printf '\n\033[2m  ← to go back   -   up/down move - Enter select - q quit\033[0m\033[K\n'
+            printf '\n\033[37m  ← to go back   (q) to quit\033[0m\033[K\n'
         fi
 
         IFS= read -rsn1 key
@@ -56,6 +60,7 @@ menu_select() {
                 case "$key" in
                     '[A' | 'OA') ((sel = (sel - 1 + n) % n)) ;;   # up
                     '[B' | 'OB') ((sel = (sel + 1) % n)) ;;       # down
+                    '[C' | 'OC') break ;;                         # right = select current item
                     '[D' | 'OD') sel=-1; break ;;                 # left = back
                     '')          sel=-1; break ;;                 # lone Esc = back
                 esac
@@ -63,7 +68,13 @@ menu_select() {
             'k') ((sel = (sel - 1 + n) % n)) ;;   # vim up
             'j') ((sel = (sel + 1) % n)) ;;       # vim down
             'h') sel=-1; break ;;                 # vim left = back
+            'l') break ;;                         # vim right = select current item
             'q') sel=-2; break ;;                 # quit
+            [1-9])                                # number = jump to and select that item
+                if ((key >= 1 && key <= n)); then
+                    sel=$((key - 1)); break
+                fi
+                ;;
             '')  break ;;                         # Enter = select
         esac
 
@@ -79,8 +90,44 @@ ask() {
     IFS= read -r REPLY
 }
 
+# ask_default "Prompt:" "default"  -> $REPLY, using the default when Enter is pressed
+ask_default() {
+    printf '\033[36m? \033[0m%s ' "$1"
+    IFS= read -r REPLY
+    [[ -z $REPLY ]] && REPLY="$2"
+}
+
+# extract_fileid "<url-or-id>"  -> echoes the Google file ID.
+# Accepts a bare ID or a full Docs/Drive URL (/d/<id>/, ?id=<id>, /folders/<id>).
+# Echoes nothing if it looks like a URL but no ID could be found.
+extract_fileid() {
+    local in="$1" id="" re
+    in="${in//[[:space:]]/}"                 # drop any stray whitespace (IDs/URLs have none)
+    if [[ $in == *http* || $in == *"/"* ]]; then
+        re='/d/([A-Za-z0-9_-]+)'             # docs/sheets/slides + drive/file/d/
+        if [[ $in =~ $re ]]; then id="${BASH_REMATCH[1]}"
+        else
+            re='[?&]id=([A-Za-z0-9_-]+)'     # open?id= / uc?id=
+            if [[ $in =~ $re ]]; then id="${BASH_REMATCH[1]}"
+            else
+                re='/folders/([A-Za-z0-9_-]+)'
+                if [[ $in =~ $re ]]; then id="${BASH_REMATCH[1]}"; fi
+            fi
+        fi
+    else
+        id="$in"                             # already a bare ID
+    fi
+    printf '%s' "$id"
+}
+
+finish() {
+    printf '\n'   # spacing, then leave the tool -- the command's output stays on screen
+    exit 0
+}
+
+# pause: on an error, let the message be read, then return to the menu
 pause() {
-    printf '\n\033[2mPress Enter to continue...\033[0m'
+    printf '\n\033[37mPress Enter to return to the menu...\033[0m'
     IFS= read -r _
 }
 
@@ -97,7 +144,7 @@ do_delegation() {
             0)
                 ask "Email address to check delegates for:"; username="$REPLY"
                 "$gam" user "$username" print delegates
-                pause
+                finish
                 ;;
             1)
                 ask "Mailbox email address:"; username="$REPLY"
@@ -109,13 +156,13 @@ do_delegation() {
                         ask "Delegate email to ADD:"; delegate="$REPLY"
                         "$gam" user "$username" delegate to "$delegate"
                         echo "$delegate has been added as a delegate for $username"
-                        pause
+                        finish
                         ;;
                     1)
                         ask "Delegate email to DELETE:"; delegate="$REPLY"
                         "$gam" user "$username" delete delegate "$delegate"
                         echo "$delegate has been deleted as a delegate for $username"
-                        pause
+                        finish
                         ;;
                 esac
                 ;;
@@ -132,7 +179,7 @@ do_forwarding() {
             0)
                 ask "Email address to check forwarding for:"; username="$REPLY"
                 "$gam" user "$username" show forward
-                pause
+                finish
                 ;;
             1)
                 ask "Mailbox to configure forwarding for:"; username="$REPLY"
@@ -150,13 +197,13 @@ do_forwarding() {
             Go to https://mail.google.com/mail/u/0/#settings/fwdandpop > Select Disable forwarding.
             Alternatively, you can go to your Gmail > Settings gear icon and select See all settings > Forwarding and POP/IMAP tab > Select Disable forwarding. "
                         echo "Email notification of email forwarding has been sent to $username"
-                        pause
+                        finish
                         ;;
                     1)
                         ask "Forwarding address to DELETE:"; forwardingusername="$REPLY"
                         "$gam" user "$username" delete forwardingaddress "$forwardingusername"
                         echo "$forwardingusername has been deleted as a forwarding address for $username"
-                        pause
+                        finish
                         ;;
                 esac
                 ;;
@@ -166,28 +213,91 @@ do_forwarding() {
 
 do_drive() {
     while true; do
-        menu_select "File / Drive" "Check file ownership" "Transfer file ownership" "Transfer entire Drive"
+        menu_select "File / Drive" \
+            "Check file ownership" \
+            "Add someone to a doc" \
+            "Transfer file ownership" \
+            "Transfer entire Drive"
         case $CHOICE in
             -2) QUIT=1; return ;;
             -1) return ;;
             0)
-                ask "FileID to check:"; fileID="$REPLY"
+                ask "FileID or URL to check:"; fileID=$(extract_fileid "$REPLY")
+                if [[ -z $fileID ]]; then
+                    echo "Could not read a FileID from that input. Aborting."
+                    pause
+                    continue
+                fi
+                echo "Using FileID: $fileID"
                 echo "Fetching the file ownership... This may take a few minutes."
-                "$gam" show ownership "$fileID"
-                pause
+                "$gam" print ownership "$fileID"
+                finish
                 ;;
             1)
-                ask "Current owner's email address:"; currentowner="$REPLY"
-                ask "Transfer file ownership to:"; newowner="$REPLY"
-                ask "FileID to transfer:"; fileID="$REPLY"
-                "$gam" user "$currentowner" add drivefileacl "$fileID" user "$newowner" role owner
-                pause
+                ask "FileID or URL of the doc:"; fileID=$(extract_fileid "$REPLY")
+                if [[ -z $fileID ]]; then
+                    echo "Could not read a FileID from that input. Aborting."
+                    pause
+                    continue
+                fi
+                echo "Using FileID: $fileID"
+
+                # The ACL command must run as the doc's owner, so find the owner first.
+                echo "Looking up the document owner..."
+                ownerinfo=$("$gam" print ownership "$fileID" 2>&1)
+                owner=$(printf '%s\n' "$ownerinfo" | grep -iE 'owner' \
+                    | grep -oE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' | head -n1)
+                if [[ -z $owner ]]; then
+                    owner=$(printf '%s\n' "$ownerinfo" \
+                        | grep -oE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' | head -n1)
+                fi
+                if [[ -z $owner ]]; then
+                    echo "Could not determine the owner of $fileID. No permission was added."
+                    pause
+                    continue
+                fi
+                echo "Owner found: $owner"
+
+                # Grantee defaults to you (press Enter).
+                ask_default "Grant access to (Enter = $ME):" "$ME"; grantee="$REPLY"
+                if [[ -z $grantee ]]; then
+                    echo "No grantee given and no default set (edit the ME variable). Aborting."
+                    pause
+                    continue
+                fi
+
+                # Role defaults to Editor (first item = highlighted = Enter picks it).
+                menu_select "Role to grant (Enter = Editor)" "Editor" "Commenter" "Reader"
+                case $CHOICE in
+                    -2) QUIT=1; return ;;
+                    -1) continue ;;
+                    0) role=writer ;;
+                    1) role=commenter ;;
+                    2) role=reader ;;
+                esac
+
+                "$gam" user "$owner" add drivefileacl "$fileID" user "$grantee" role "$role"
+                echo "Granted '$role' on $fileID to $grantee (via owner $owner)"
+                finish
                 ;;
             2)
+                ask "Current owner's email address:"; currentowner="$REPLY"
+                ask "Transfer file ownership to:"; newowner="$REPLY"
+                ask "FileID or URL to transfer:"; fileID=$(extract_fileid "$REPLY")
+                if [[ -z $fileID ]]; then
+                    echo "Could not read a FileID from that input. Aborting."
+                    pause
+                    continue
+                fi
+                echo "Using FileID: $fileID"
+                "$gam" user "$currentowner" add drivefileacl "$fileID" user "$newowner" role owner
+                finish
+                ;;
+            3)
                 ask "Transfer the Drive for (user email):"; username="$REPLY"
                 ask "Transfer Drive ownership to:"; transferemail="$REPLY"
                 "$gam" create datatransfer "$username" drive "$transferemail" all
-                pause
+                finish
                 ;;
         esac
     done
@@ -219,12 +329,12 @@ do_calendar() {
                     0) "$gam" "$usertype" "$username" print calendars showhidden todrive ;;
                     1) "$gam" "$usertype" "$username" print calendars showhidden ;;
                 esac
-                pause
+                finish
                 ;;
             1)
                 ask "Calendar email address to check:"; calendaremail="$REPLY"
                 "$gam" calendar "$calendaremail" show acls
-                pause
+                finish
                 ;;
             2)
                 menu_select "Add or update calendar permissions?" "Add" "Update"
@@ -262,13 +372,13 @@ do_calendar() {
                     "$gam" calendar "$calendaremail" update acls "$calendarpermission" "$usertype" "$username"
                     echo "$username permission for $calendaremail has been updated to: $calendarpermission"
                 fi
-                pause
+                finish
                 ;;
             3)
                 ask "Calendar to transfer (current owner email):"; calendaremail="$REPLY"
                 ask "Transfer calendar ownership to:"; transferemail="$REPLY"
                 "$gam" create datatransfer "$calendaremail" calendar "$transferemail" releaseresources
-                pause
+                finish
                 ;;
         esac
     done
@@ -283,7 +393,7 @@ do_ooo() {
             0)
                 ask "Email to check the OOO message for:"; username="$REPLY"
                 "$gam" user "$username" show vacation format
-                pause
+                finish
                 ;;
             1)
                 menu_select "Enable or disable the OOO message?" "Enable" "Disable"
@@ -295,13 +405,13 @@ do_ooo() {
                         printf 'The default out of office message is the following:\n|  Hello,\n|\n|  I am currently OOO and will respond to your message as soon as I return. Thank you!\n\n'
                         "$gam" user "$username" vacation on subject "Out of Office" message "Hello,\n\nI am currently OOO and will respond to your message as soon as I return. Thank you! " start 2000-01-01 end 2999-01-01
                         "$gam" user "$username" show vacation
-                        pause
+                        finish
                         ;;
                     1)
                         ask "Email address:"; username="$REPLY"
                         "$gam" user "$username" vacation off
                         echo "The Out of Office message has been disabled for $username"
-                        pause
+                        finish
                         ;;
                 esac
                 ;;
@@ -314,10 +424,11 @@ do_purge() {
     # Empty-input guard (not a confirmation) -- prevents a malformed query.
     if [[ -z $msgid ]]; then
         echo "No Message-ID provided."
-    else
-        "$gam" all users delete messages query "rfc822msgid:$msgid" doit
+        pause
+        return
     fi
-    pause
+    "$gam" all users delete messages query "rfc822msgid:$msgid" doit
+    finish
 }
 
 # ---------------------------------------------------------------------------
@@ -325,7 +436,7 @@ do_purge() {
 # ---------------------------------------------------------------------------
 
 main() {
-    trap 'tput cnorm; clear' EXIT
+    trap 'tput cnorm' EXIT
     while true; do
         TOPLEVEL=1
         menu_select "GAM Workspace Admin - select a task" \
@@ -348,6 +459,9 @@ main() {
         esac
         ((QUIT)) && break
     done
+    # The loop only ends on quit (q). Successful commands exit earlier via finish()
+    # without clearing, so their output persists; here we tidy the screen on quit.
+    clear
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
